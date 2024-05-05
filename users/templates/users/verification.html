@@ -1,0 +1,22 @@
+{% extends 'users/base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}User Verification{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="verification-notice">
+                <h1 class="text-center">Check Your Email</h1>
+                <div class="alert alert-info" role="alert">
+                    <h4 class="alert-heading">Just One More Step!</h4>
+                    <p>We've sent a verification link to your email. Please click on the link to verify your email address and activate your account.</p>
+                    <hr>
+                    <p class="mb-0">Didn't receive the email? Check your spam folder or
+                        <a href="{% url 'resend_verification_email' %}" class="alert-link">request a new link</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,20 @@
+{% extends 'users/base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <form method="POST" enctype="multipart/form-data" action="" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {{ form.username|as_crispy_field }}
+        {{ form.email|as_crispy_field }}
+        {{ form.password1|as_crispy_field }}
+        {{ form.password2|as_crispy_field }}
+        {{ form.image|as_crispy_field }}
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

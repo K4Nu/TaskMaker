@@ -1,0 +1,32 @@
+{% extends 'users/base.html' %}
+{% load static %}
+{% block title %}
+Task Maker - Organize Your Tasks
+{% endblock %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/landing.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container text-center mt-5">
+    <h1 class="mb-3">Welcome to Task Maker</h1>
+    <p class="mb-5">Your tasks organized in one place.</p>
+
+    <!-- Simulated Task Card -->
+    <div class="card mx-auto mb-5" style="max-width: 30rem;">
+        <div class="card-header bg-primary text-white">
+            Start working with Task Maker
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Start improving and get work done</h5>
+            <p class="card-text">Get organized today! Enhance your productivity with Task Maker by managing and tracking your tasks efficiently.</p>
+            <p class="card-text"><small class="text-muted">Start: {{ today|date:"d-m-Y" }} - End: Never</small></p>
+        </div>
+    </div>
+
+    <!-- Registration and Login Buttons -->
+    <div>
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg mx-1">Register</a>
+        <a href="{% url 'login' %}" class="btn btn-secondary btn-lg mx-1">Login</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+   body {
+        /* Replace with your actual color values from the logo */
+        background: linear-gradient(135deg, #117CC1 0%, #0f9b0f 100%);
+        color:white;
+    }
+    .btn-custom {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 1.2em;
+        color: #fff; /* Or another color that contrasts well with your gradient */
+        border: none;
+    }
+    .btn-register {
+        background-color: #color3; /* Replace with a color from your logo */
+    }
+    .btn-login {
+        background-color: #color4; /* Replace with another color from your logo */
+    }

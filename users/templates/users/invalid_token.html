@@ -1,0 +1,29 @@
+{% extends "users/base.html" %}
+{%block title%}Invalid password reset{%endblock%}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h2 class="card-title">Email Verification Failed</h2>
+                </div>
+                <div class="card-body">
+                    <p>Unfortunately, the verification link is invalid or has expired. This can happen if the link has already been used or if it expired due to time constraints.</p>
+                    <p>If you need a new verification link, you can request one below. We'll send a new email to you, so you can verify your account.</p>
+
+                    <!-- Adding a form to resend the verification email -->
+                    <form action="{% url 'resend_verification_email' %}" method="post" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_email" value="{{ user.email }}">
+                        <button type="submit" class="btn btn-primary">Resend Verification Email</button>
+                    </form>
+
+                    <!-- Alternatively, provide a link if you have a dedicated view for resending verification emails -->
+                    <a href="{% url 'resend_verification_email' %}" class="btn btn-link">Request New Verification Email</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

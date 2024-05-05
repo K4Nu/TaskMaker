@@ -1,0 +1,81 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Generate Image</h1>
+    <form id="imageForm" method="post" enctype="multipart/form-data" class="mb-3">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="text" name="input" id="input" class="form-control" placeholder="Enter description for the image">
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Image</button>
+    </form>
+
+    <!-- Error Container -->
+    <div id="errorContainer" class="alert alert-danger" style="display: none;"></div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" style="display: none;">
+        <span>Loading...</span>
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only"></span>
+        </div>
+    </div>
+
+    <!-- Image Container -->
+    <div id="imageContainer" class="mt-4 d-flex justify-content-center align-items-center" style="min-height: 200px;">
+        <!-- The image will be added here dynamically -->
+    </div>
+</div>
+
+<script>
+document.getElementById('imageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var formData = new FormData(this);
+    var loadingIndicator = document.getElementById('loadingIndicator');
+    var imageContainer = document.getElementById('imageContainer');
+    var errorContainer = document.getElementById('errorContainer');
+
+    // Show loading indicator
+    loadingIndicator.style.display = 'block';
+    imageContainer.innerHTML = ''; // Clear previous images if any
+    errorContainer.style.display = 'none'; // Hide previous error messages
+    errorContainer.innerHTML = ''; // Clear previous error messages
+
+    fetch("{% url 'generate_image' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+    })
+    .then(response => {
+        // Hide loading indicator regardless of response
+        loadingIndicator.style.display = 'none';
+
+        if (!response.ok) {
+            return response.json().then(data => Promise.reject(data));
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            imageContainer.innerHTML = '<img src="' + data.image_url + '" alt="Generated Image" class="img-fluid mx-auto" style="display: block; max-width: 100%;">'; // Ensure centering by using mx-auto and display: block
+        } else {
+            throw new Error(data.error || 'Unknown error occurred');
+        }
+    })
+    .catch(error => {
+        if (error.errors) {
+            // Assuming 'errors' contains an array of error objects
+            const messages = error.errors.input.map(e => e.message).join(', ');
+            errorContainer.innerText = messages;
+        } else {
+            errorContainer.innerText = error.message || 'An unexpected error occurred';
+        }
+        errorContainer.style.display = 'block'; // Show the error message
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'users/base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Resend User Verification Form{% endblock %}
+{{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h2 class="text-center mb-4">Resend Verification Email</h2>
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group mb-3">
+                        {{ field|as_crispy_field }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary w-100">Resend Email</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
