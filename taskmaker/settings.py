@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import crispy_bootstrap5
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -50,8 +51,11 @@ ROOT_URLCONF = "taskmaker.urls"
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # Additional paths can be specified here
-        'APP_DIRS': True,
+        'DIRS': [
+            # Standard directory for your project's templates
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'APP_DIRS': True,  # Allows template loading from application directories
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
