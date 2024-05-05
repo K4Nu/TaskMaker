@@ -146,3 +146,5 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 MAX_UPLOAD_SIZE=os.environ.get("MAX_UPLOAD_SIZE")
+
+CSRF_TRUSTED_ORIGINS = ['https://taskmaker-production.up.railway.app']
