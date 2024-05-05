@@ -1,4 +1,5 @@
 {% extends 'users/base.html' %}
+{% load crispy_forms_tags %}
 {% block title %}Register{% endblock %}
 {% block content %}
 <div class="container mt-5">
@@ -6,41 +7,11 @@
     <div class="col-md-6 offset-md-3">
       <form method="POST" enctype="multipart/form-data" action="" class="needs-validation" novalidate>
         {% csrf_token %}
-        <div class="form-group">
-          <label for="id_username">Username</label>
-          <input type="text" name="username" class="form-control" id="id_username" placeholder="Enter username" required value="{{ form.username.value|default_if_none:'' }}">
-          {% for error in form.username.errors %}
-          <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-        <div class="form-group">
-          <label for="id_email">Email</label>
-          <input type="email" name="email" class="form-control" id="id_email" placeholder="Enter email" required value="{{ form.email.value|default_if_none:'' }}">
-          {% for error in form.email.errors %}
-          <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-        <div class="form-group">
-          <label for="id_password1">Password</label>
-          <input type="password" name="password1" class="form-control" id="id_password1" placeholder="Enter password" required>
-          {% for error in form.password1.errors %}
-          <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-        <div class="form-group">
-          <label for="id_password2">Confirm Password</label>
-          <input type="password" name="password2" class="form-control" id="id_password2" placeholder="Confirm password" required>
-          {% for error in form.password2.errors %}
-          <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-        <div class="form-group">
-          <label for="id_image">Profile Picture</label>
-          <input type="file" name="image" class="form-control-file" id="id_image">
-          {% for error in form.image.errors %}
-          <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
+        {{ form.username|as_crispy_field }}
+        {{ form.email|as_crispy_field }}
+        {{ form.password1|as_crispy_field }}
+        {{ form.password2|as_crispy_field }}
+        {{ form.image|as_crispy_field }}
         <button type="submit" class="btn btn-primary">Register</button>
       </form>
     </div>
