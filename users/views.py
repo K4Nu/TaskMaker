@@ -42,6 +42,9 @@ def index(request):
     return render(request,"users/index.html")
 
 def register(request):
+    from django.apps import apps
+    print(apps.is_installed('crispy_forms'))
+    print(apps.is_installed('crispy_bootstrap5'))
     if request.method=="POST":
         form=CustomUserCreationForm(request.POST,request.FILES)
         if form.is_valid():
