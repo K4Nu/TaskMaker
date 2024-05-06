@@ -24,6 +24,10 @@ from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
 from .utils import send_verification_email,image_generation
 from django.utils.timezone import now
+import logging
+from django.apps import apps
+
+logger = logging.getLogger(__name__)
 
 def index(request):
     if request.user.is_anonymous:
@@ -42,9 +46,8 @@ def index(request):
     return render(request,"users/index.html")
 
 def register(request):
-    from django.apps import apps
-    print(apps.is_installed('crispy_forms'))
-    print(apps.is_installed('crispy_bootstrap5'))
+    logger.info('Is crispy_forms installed? %s', apps.is_installed('crispy_forms'))
+    logger.info('Is crispy_bootstrap5 installed? %s', apps.is_installed('crispy_bootstrap5'))
     if request.method=="POST":
         form=CustomUserCreationForm(request.POST,request.FILES)
         if form.is_valid():
