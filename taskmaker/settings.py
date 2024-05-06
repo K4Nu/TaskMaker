@@ -23,8 +23,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     "crispy_forms",
-    #"crispy_bootstrap5",
-    "crispy_bootstrap4",
+    "crispy_bootstrap5",
     "users.apps.UsersConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -134,8 +133,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CRISPY_TEMPLATE_PACK = "Bootstrap4"
-CRISPY_ALLOWED_TEMPLATE_PACKS = "Bootstrap4"
+CRISPY_TEMPLATE_PACK = "Bootstrap5"
+CRISPY_ALLOWED_TEMPLATE_PACKS = "Bootstrap5"
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
