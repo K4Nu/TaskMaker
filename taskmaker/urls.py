@@ -6,7 +6,8 @@ from users import views as user_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
+    path("employee/", admin.site.urls),
     path("",user_views.index,name='index'),
     path("register/",user_views.register,name="register"),
     path('login/', user_views.custom_login_view, name='login'),
