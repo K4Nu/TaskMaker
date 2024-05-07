@@ -23,9 +23,8 @@ CSRF_TRUSTED_ORIGINS=os.environ.get("CSRF_TRUSTED_ORIGINS", "").split()
 # Application definition
 
 INSTALLED_APPS = [
-    "crispy_forms",
-    "crispy_bootstrap5",
     "users.apps.UsersConfig",
+    "widget_tweaks",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 def index(request):
     if request.user.is_anonymous:
-        return render(request,"users/landing.html")
+        return render(request,"users/landing.html",{"today":now().date()})
     """
     tasks = Task.objects.filter(status=True, date_end__gte=timezone.now(),user=request.user).order_by('date_end')
     paginator=Paginator(tasks,9)
