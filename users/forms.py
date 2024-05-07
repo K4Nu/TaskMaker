@@ -42,7 +42,7 @@ class CustomUserCreationForm(UserCreationForm):
         if image:
             extension=os.path.splitext(image.name)[1].lower()
             valid_extensions = ['.png', '.jpg', '.jpeg']
-            if image.size>settings.MAX_UPLOAD_SIZE:
+            if image.size>int(eval(os.environ.get("MAX_UPLOAD_SIZE"))):
                 raise forms.ValidationError(f"File size is too big, maximum allowed size is {round(settings.MAX_UPLOAD_SIZE / (1024 * 1024))} MB")
             if extension not in valid_extensions:
                 raise forms.ValidationError("Unsupported file extension. Allowed extensions are: PNG, JPG, JPEG.")

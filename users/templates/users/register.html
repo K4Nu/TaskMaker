@@ -1,13 +1,45 @@
 {% extends 'users/base.html' %}
-{% load crispy_forms_tags %}
+
 {% block title %}Register{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
   <div class="row">
     <div class="col-md-6 offset-md-3">
       <form method="POST" enctype="multipart/form-data" action="" class="needs-validation" novalidate>
         {% csrf_token %}
-        {{ form|crispy }}
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" required>
+          <div class="invalid-feedback">
+            Please choose a username.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+          <div class="invalid-feedback">
+            Please provide a valid email address.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="password1" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password1" name="password1" required>
+          <div class="invalid-feedback">
+            Please enter a password.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="password2" class="form-label">Confirm Password</label>
+          <input type="password" class="form-control" id="password2" name="password2" required>
+          <div class="invalid-feedback">
+            Please confirm your password.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="image" class="form-label">Profile Image</label>
+          <input type="file" class="form-control" id="image" name="image">
+        </div>
         <button type="submit" class="btn btn-primary">Register</button>
       </form>
     </div>
