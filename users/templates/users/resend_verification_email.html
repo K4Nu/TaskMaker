@@ -1,7 +1,7 @@
 {% extends 'users/base.html' %}
-{% load crispy_forms_tags %}
+{% load widget_tweaks %}
 {% block title %}Resend User Verification Form{% endblock %}
-{{% block content %}
+{% block content %}
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6 offset-md-3">
@@ -10,13 +10,17 @@
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group mb-3">
-                        {{ field|as_crispy_field }}
+                        <!-- Use render_field to apply Bootstrap form-control class -->
+                        {% render_field field class+="form-control" %}
                         {% if field.help_text %}
                             <small class="form-text text-muted">{{ field.help_text }}</small>
                         {% endif %}
-                        {% for error in field.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
+                        {% if field.errors %}
+                            <!-- Displaying errors directly under the field -->
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback" style="display: block;">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 {% endfor %}
                 <button type="submit" class="btn btn-primary w-100">Resend Email</button>

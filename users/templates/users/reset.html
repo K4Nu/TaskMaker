@@ -1,5 +1,5 @@
 {% extends 'users/base.html' %}
-{% load crispy_forms_tags %}
+{% load widget_tweaks %}
 {% block title %}Reset Password Form{% endblock %}
 {% block content %}
 <div class="container mt-5">
@@ -13,10 +13,22 @@
                     <form method="post" class="needs-validation" novalidate>
                         {% csrf_token %}
                         <div class="mb-3">
-                            {{ form.new_password1|as_crispy_field }}
+                            <!-- Render the new_password1 field with widget_tweaks -->
+                            {% render_field form.new_password1 class+="form-control" %}
+                            {% if form.new_password1.errors %}
+                                {% for error in form.new_password1.errors %}
+                                    <div class="invalid-feedback" style="display: block;">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                         <div class="mb-3">
-                            {{ form.new_password2|as_crispy_field }}
+                            <!-- Render the new_password2 field with widget_tweaks -->
+                            {% render_field form.new_password2 class+="form-control" %}
+                            {% if form.new_password2.errors %}
+                                {% for error in form.new_password2.errors %}
+                                    <div class="invalid-feedback" style="display: block;">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary btn-lg">Change Password</button>

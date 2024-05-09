@@ -6,6 +6,11 @@ from .models import Profile
 from django.contrib.auth.forms import AuthenticationForm
 from django.conf import settings
 from .utils import nfsw_filter
+from django import forms
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -22,7 +27,6 @@ class CustomUserCreationForm(UserCreationForm):
 
     def clean_username(self):
         username = self.cleaned_data.get("username")
-        # Check if the username is not None or an empty string
         if username and User.objects.filter(username=username).exists():
             raise forms.ValidationError("Username already exists")
         return username
@@ -77,7 +81,13 @@ class ResendVerificationEmailForm(forms.Form):
     email=forms.EmailField(label="Your email address")
 
 class CustomAuthenticationForm(AuthenticationForm):
-    pass
+    def confirm_login_allowed(self, user):
+        super().confirm_login_allowed(user)  # Ensure all other base validations are still performed
+        if not user.profile.email_verified:
+            raise forms.ValidationError(
+                "Your email address is not verified.",
+                code='email_not_verified',
+            )
 
 class ImageGenerationForm(forms.Form):
     input=forms.CharField(label="input",max_length=1500)

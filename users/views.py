@@ -25,8 +25,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from .utils import send_verification_email,image_generation
 from django.utils.timezone import now
 import logging
-from django.apps import apps
-
 logger = logging.getLogger(__name__)
 
 def index(request):
@@ -146,6 +144,7 @@ def custom_login_view(request):
     else:
         form = CustomAuthenticationForm()
     return render(request, 'users/login.html', {'form': form})
+
 
 
 @login_required

@@ -12,6 +12,11 @@
                 <div class="mb-3">
                     <label for="id_username" class="form-label">Username</label>
                     {% render_field form.username class="form-control" placeholder="Username" %}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
                 <div class="mb-3">
                     <label for="id_email" class="form-label">Email</label>
@@ -25,14 +30,29 @@
                 <div class="mb-3">
                     <label for="id_password1" class="form-label">Password</label>
                     {% render_field form.password1 class="form-control" placeholder="Password" %}
+                    {% if form.password1.errors %}
+                        {% for error in form.password1.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
                 <div class="mb-3">
                     <label for="id_password2" class="form-label">Confirm Password</label>
                     {% render_field form.password2 class="form-control" placeholder="Confirm Password" %}
+                    {% if form.password2.errors %}
+                        {% for error in form.password2.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
                 <div class="mb-3">
                     <label for="id_image" class="form-label">Profile Image (optional)</label>
                     {% render_field form.image class="form-control" %}
+                    {% if form.image.errors %}
+                        {% for error in form.image.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
                 <button type="submit" class="btn btn-primary">Register</button>
             </form>
