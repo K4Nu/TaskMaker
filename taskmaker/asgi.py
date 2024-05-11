@@ -1,5 +1,5 @@
 """
-ASGI config for taskmaker project.
+ASGI config for taskmaker templates.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

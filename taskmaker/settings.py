@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build paths inside the templates like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
@@ -23,6 +23,7 @@ CSRF_TRUSTED_ORIGINS=os.environ.get("CSRF_TRUSTED_ORIGINS", "").split()
 
 INSTALLED_APPS = [
     "users.apps.UsersConfig",
+    "project.apps.ProjectConfig",
     "widget_tweaks",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -51,7 +52,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            # Standard directory for your project's templates
+            # Standard directory for your templates's templates
             os.path.join(BASE_DIR, 'templates'),
         ],
         'APP_DIRS': True,  # Allows template loading from application directories

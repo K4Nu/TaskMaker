@@ -1,0 +1,61 @@
+{% extends 'users/base.html' %}
+{% load widget_tweaks %}
+{% block title %}Task Form{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <form method="post" action="">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          {{ form.title.label_tag }}
+          {% render_field form.title class="form-control" %}
+        </div>
+
+        <div class="form-group">
+          {{ form.content.label_tag }}
+          {% render_field form.content class="form-control" %}
+        </div>
+
+        <div class="form-group">
+          {{ form.date_start.label_tag }}
+          {% render_field form.date_start class="form-control" type="date" %}
+            {% if form.date_start.errors %}
+                        {% for error in form.date_start.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+        </div>
+
+        <div class="form-group">
+          {{ form.date_end.label_tag }}
+          {% render_field form.date_end class="form-control" type="date" %}
+            {% if form.date_end.errors %}
+                        {% for error in form.date_end.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+        </div>
+
+        <div class="form-group">
+          {{ form.color.label_tag }}
+          {% render_field form.color class="form-control" type="color" %}
+        </div>
+
+        <!-- Displaying non-field errors -->
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

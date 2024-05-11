@@ -1,5 +1,5 @@
 """
-WSGI config for taskmaker project.
+WSGI config for taskmaker templates.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

@@ -1,42 +1,46 @@
 {% extends 'users/base.html' %}
-{% load widget_tweaks %}  <!-- Load the widget_tweaks library for form customization -->
-
+{% load widget_tweaks %}
 {% block title %}Login{% endblock %}
 
 {% block content %}
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    {% endfor %}
-{% endif %}
-
-<div class="container">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-lg-6 col-md-8">
             <h2>Login</h2>
-            <form method="post" action="" class="mt-4">
+            <form method="post">
                 {% csrf_token %}
-                <div class="form-group">
-                    {% for field in form %}
-                        {{ field.label_tag }}
-                        {% render_field field class="form-control" %}
-                        {% if field.help_text %}
-                            <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
-                        {% for error in field.errors %}
+                <div class="mb-3">
+                    <label for="id_username" class="form-label">Username</label>
+                    {% render_field form.username class="form-control" placeholder="Username" %}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
                             <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
-                    {% endfor %}
+                    {% endif %}
                 </div>
+                <div class="mb-3">
+                    <label for="id_password" class="form-label">Password</label>
+                    {% render_field form.password class="form-control" placeholder="Password" type="password" %}
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                 {% if form.non_field_errors %}
+                 {% for error in form.non_field_errors %}
+                 <div class="alert alert-danger">{{ error }}</div>
+                 {% endfor %}
+                 {% endif %}
                 <button type="submit" class="btn btn-primary">Login</button>
+                <div class="mt-3 text-center">
+                    <a href="{% url 'password_reset' %}">Forgot password?</a>
+                </div>
+                <div class="mt-3 text-center">
+                    <span>If you don't have an account, <a href="{% url 'register' %}">Sign up</a></span>
+                </div>
             </form>
         </div>
     </div>
 </div>
-
 {% endblock %}

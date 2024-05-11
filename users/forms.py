@@ -97,8 +97,8 @@ class CustomLoginForm(forms.Form):
         cleaned_data = super().clean()
         username = cleaned_data.get('username')
         password = cleaned_data.get('password')
-        user=User.objects.filter(username=username).first().profile
-        if not user.email_verified:
+        user=User.objects.filter(username=username).first()
+        if user is None or not user.profile.email_verified:
             raise forms.ValidationError("Please verify email address")
         elif not authenticate(username=username, password=password):
             raise forms.ValidationError("Invalid username or password")

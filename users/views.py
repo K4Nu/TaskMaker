@@ -139,6 +139,8 @@ def custom_login_view(request):
                     login(request, user)
                     messages.success(request, "Successfully logged in.")
                     return redirect('index')
+        else:
+            print(form.errors)
     else:
         form = CustomLoginForm()
     return render(request, 'users/login.html', {'form': form})
