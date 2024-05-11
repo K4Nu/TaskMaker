@@ -8,7 +8,7 @@ from .forms import (
     UpdateUserForm,
     UpdateProfileForm,
     ResendVerificationEmailForm,
-    CustomAuthenticationForm,
+    CustomLoginForm,
     ImageGenerationForm
 )
 from .models import Profile
@@ -24,8 +24,7 @@ from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
 from .utils import send_verification_email,image_generation
 from django.utils.timezone import now
-import logging
-logger = logging.getLogger(__name__)
+from django.core.exceptions import PermissionDenied
 
 def index(request):
     if request.user.is_anonymous:
@@ -126,24 +125,25 @@ def resend_verification_email(request):
     # This return will handle both GET requests and POST requests where the form is not valid or an exception occurs
     return render(request, 'users/resend_verification_email.html', {'form': form})
 
+
+
 def custom_login_view(request):
     if request.method == 'POST':
-        form = CustomAuthenticationForm(data=request.POST)
+        form = CustomLoginForm(data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
             if user is not None:
                 if user.profile.email_verified:
                     login(request, user)
-                    return redirect('index')  # Redirect to a success page.
-                else:
-                    messages.error(request, "Your email address is not verified.")
-            else:
-                messages.error(request, "Invalid username or password.")
+                    messages.success(request, "Successfully logged in.")
+                    return redirect('index')
     else:
-        form = CustomAuthenticationForm()
+        form = CustomLoginForm()
     return render(request, 'users/login.html', {'form': form})
+
+
 
 
 

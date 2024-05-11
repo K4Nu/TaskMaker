@@ -7,10 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.conf import settings
 from .utils import nfsw_filter
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-
+from django.contrib.auth import authenticate
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -80,15 +77,6 @@ class UpdateProfileForm(forms.ModelForm):
 class ResendVerificationEmailForm(forms.Form):
     email=forms.EmailField(label="Your email address")
 
-class CustomAuthenticationForm(AuthenticationForm):
-    def confirm_login_allowed(self, user):
-        super().confirm_login_allowed(user)  # Ensure all other base validations are still performed
-        if not user.profile.email_verified:
-            raise forms.ValidationError(
-                "Your email address is not verified.",
-                code='email_not_verified',
-            )
-
 class ImageGenerationForm(forms.Form):
     input=forms.CharField(label="input",max_length=1500)
 
@@ -100,3 +88,18 @@ class ImageGenerationForm(forms.Form):
         if not safe_scores or safe_scores[0] < 0.7:
             raise forms.ValidationError("This content is not allowed")
         return input
+
+class CustomLoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        password = cleaned_data.get('password')
+        user=User.objects.filter(username=username).first().profile
+        if not user.email_verified:
+            raise forms.ValidationError("Please verify email address")
+        elif not authenticate(username=username, password=password):
+            raise forms.ValidationError("Invalid username or password")
+        return cleaned_data
