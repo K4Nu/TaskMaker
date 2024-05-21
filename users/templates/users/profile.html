@@ -10,5 +10,41 @@
             <a href="{% url 'profile_update' %}" class="btn btn-primary mt-4">Update Profile</a>
         </div>
     </div>
+    <div class="row mt-4 justify-content-center">
+        <!-- Current Tasks -->
+        <div class="col-md-6 text-center">
+            <h4>Current Tasks</h4>
+            {% for task in current %}
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: {{ task.color }}; {% if task.color == '#000000' %}color: white;{% endif %}">
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    <p class="card-text">{{ task.content }}</p>
+                    <p class="card-text"><small class="text-muted">Due: {{ task.date_end }}</small></p>
+                </div>
+            </div>
+            {% empty %}
+            <p>No current tasks.</p>
+            {% endfor %}
+        </div>
+        <!-- Done Tasks -->
+        <div class="col-md-6 text-center">
+            <h4>Completed Tasks</h4>
+            {% for task in done %}
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: {{ task.color }}; {% if task.color != '#FFFFFF' %}color: white;{% endif %}">
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    <p class="card-text">{{ task.content }}</p>
+                    <p class="card-text"><small class="text-muted">Completed on: {{ task.date_end }}</small></p>
+                </div>
+            </div>
+            {% empty %}
+            <p>No completed tasks.</p>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

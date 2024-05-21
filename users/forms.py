@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from .models import Profile
 from django.contrib.auth.forms import AuthenticationForm
 from django.conf import settings
-from .utils import nfsw_filter
 from django import forms
 from django.contrib.auth import authenticate
 
@@ -76,18 +75,6 @@ class UpdateProfileForm(forms.ModelForm):
 
 class ResendVerificationEmailForm(forms.Form):
     email=forms.EmailField(label="Your email address")
-
-class ImageGenerationForm(forms.Form):
-    input=forms.CharField(label="input",max_length=1500)
-
-    def clean_input(self):
-        input = self.cleaned_data.get("input")
-        output = nfsw_filter({'inputs': input})
-        # Extract scores for the label 'safe'
-        safe_scores = [item['score'] for item in output[0] if item['label'] == 'safe']
-        if not safe_scores or safe_scores[0] < 0.7:
-            raise forms.ValidationError("This content is not allowed")
-        return input
 
 class CustomLoginForm(forms.Form):
     username = forms.CharField()

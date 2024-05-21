@@ -8,8 +8,7 @@ from .forms import (
     UpdateUserForm,
     UpdateProfileForm,
     ResendVerificationEmailForm,
-    CustomLoginForm,
-    ImageGenerationForm
+    CustomLoginForm
 )
 from .models import Profile
 from django.contrib.auth.decorators import login_required
@@ -17,20 +16,19 @@ from django.core.signing import Signer, BadSignature
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-#from task.models import Task
+from projects.models import Task
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
-from .utils import send_verification_email,image_generation
+from .task import send_verification_email,send_welcome
 from django.utils.timezone import now
 from django.core.exceptions import PermissionDenied
 
 def index(request):
     if request.user.is_anonymous:
         return render(request,"users/landing.html",{"today":now().date()})
-    """
-    tasks = Task.objects.filter(status=True, date_end__gte=timezone.now(),user=request.user).order_by('date_end')
+    tasks = Task.objects.filter(status=True, date_end__gte=timezone.now(),assigned_users=request.user).order_by('date_end')
     paginator=Paginator(tasks,9)
     page=request.GET.get("page")
     try:
@@ -39,8 +37,7 @@ def index(request):
         tasks=paginator.page(1)
     except EmptyPage:
         tasks.paginator.page(paginator.num_pages)
-    """
-    return render(request,"users/index.html")
+    return render(request,"users/index.html", {"tasks":tasks})
 
 def register(request):
     if request.method=="POST":
@@ -54,7 +51,8 @@ def register(request):
             profile.save()
             current_site=get_current_site(request)
             domain=current_site.domain
-            send_verification_email(user,domain)
+            send_verification_email.delay(user.id,domain)
+            send_welcome.delay(user.username,user.email)
             return render(request,"users/verification.html")
     else:
         form=CustomUserCreationForm()
@@ -63,9 +61,9 @@ def register(request):
 
 @login_required
 def profile(request):
-    #current=Task.objects.filter(user=request.user,status=True)
-    #done = Task.objects.filter(user=request.user, status=False)
-    return render(request, "users/profile.html")#{"current":current,"done":done})
+    current=Task.objects.filter(assigned_users=request.user,status=True)
+    done = Task.objects.filter(assigned_users=request.user, status=False)
+    return render(request, "users/profile.html",{"current":current,"done":done})
 
 @login_required
 def profile_update(request):
@@ -148,31 +146,3 @@ def custom_login_view(request):
 
 
 
-
-@login_required
-def generate_image(request):
-    if request.method == "POST":
-        form = ImageGenerationForm(request.POST)
-        if form.is_valid():
-            try:
-                filename = "test.png"
-                filepath = os.path.join("media", filename)
-                input_data = form.cleaned_data.get("input")
-
-                image_data = image_generation({"inputs": input_data})
-                image = Image.open(io.BytesIO(image_data))
-                image.thumbnail((512, 512), Image.Resampling.LANCZOS)
-                image.save(filepath, "PNG")
-
-                timestamp = now().strftime("%Y%m%d%H%M%S")
-                image_url = os.path.join('/media/', filename) + f"?{timestamp}"
-                return JsonResponse({'success': True, 'image_url': image_url}, status=200)
-            except Exception as e:
-                return JsonResponse({'success': False, 'error': f"An error occurred: {str(e)}"}, status=500)
-        else:
-            errors={field:error.get_json_data() for field,error in form.errors.items()}
-            print(errors)
-            return JsonResponse({"success":False,"errors":errors},status=400)
-    else:
-        form = ImageGenerationForm()
-    return render(request, "users/generate_image.html", {"form": form})

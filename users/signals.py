@@ -13,12 +13,6 @@ from django.core.files.base import ContentFile
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
     if created:
-        send_mail(
-            'Welcome to To-Do App',
-            f'Welcome {instance.username} to our app, we hope you will enjoy it',
-            os.environ.get("EMAIL_HOST_USER"),
-            [instance.email],
-        )
         if instance.is_superuser:
             Profile.objects.create(user=instance,image="admin.png",email_verified=True)
 

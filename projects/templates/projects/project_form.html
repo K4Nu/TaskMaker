@@ -1,0 +1,43 @@
+{% extends 'users/base.html' %}
+{% load widget_tweaks %}  <!-- Load widget_tweaks to manipulate form fields -->
+{% block title %}Project Form{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <form method="post" action="">
+        {% csrf_token %}
+        {% render_field form.title class="form-control" placeholder="Enter project title" %}
+        {% render_field form.content class="form-control" placeholder="Describe the project" %}
+
+        {% render_field form.date_start class="form-control" type="date" %}
+        {% if form.date_start.errors %}
+          <div class="alert alert-danger">
+            {% for error in form.date_start.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% render_field form.date_end class="form-control" type="date" %}
+        {% if form.date_end.errors %}
+          <div class="alert alert-danger">
+            {% for error in form.date_end.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <!-- Displaying non-field errors -->
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

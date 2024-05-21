@@ -23,7 +23,7 @@ CSRF_TRUSTED_ORIGINS=os.environ.get("CSRF_TRUSTED_ORIGINS", "").split()
 
 INSTALLED_APPS = [
     "users.apps.UsersConfig",
-    "project.apps.ProjectConfig",
+    "projects.apps.ProjectsConfig",
     "widget_tweaks",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -169,3 +169,7 @@ from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+CELERY_BROKER_URL=os.environ.get("CELERY_BROKER_URL")
+CELERY_ACCEPT_CONTENT=["json"]
+CELERY_TASK_SERIALIZER="json"
+CELERY_RESULT_SERIALIZER = 'json'
