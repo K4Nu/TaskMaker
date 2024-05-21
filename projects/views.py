@@ -132,5 +132,6 @@ def verify_project_invite(request,token):
 @login_required
 def project_dashboard(request,project_id):
     project=Project.objects.get(id=project_id)
-    if project.users==request.user:
-        return render(request,"projects/project_form.html")
+    if request.user in project.users.all():
+        return render(request,"projects/project.html")
+    return redirect("my_projects")

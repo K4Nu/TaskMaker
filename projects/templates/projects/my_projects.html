@@ -8,6 +8,10 @@
         font-size: 1.5rem; /* Increase the font size */
         font-weight: bold; /* Make the title bold */
         color: #2c3e50; /* Darker color for the title */
+        text-decoration: none; /* Remove underline from link */
+    }
+    .project-title:hover {
+        text-decoration: underline; /* Underline on hover */
     }
 </style>
 <div class="container mt-3">
@@ -15,7 +19,9 @@
         {% for project in projects %}
         <div class="list-group-item list-group-item-action flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
-                <h3 class="mb-1 project-title">{{ project.title }}</h3> <!-- Use h3 class and custom CSS class -->
+                <h3 class="mb-1">
+                    <a href="{% url 'project_dashboard' project_id=project.id %}" class="project-title">{{ project.title }}</a>
+                </h3> <!-- Use h3 class and custom CSS class -->
                 <small>Start: {{ project.date_start }} | End: {{ project.date_end }}</small>
             </div>
             <p class="mb-1">{{ project.content }}</p>
