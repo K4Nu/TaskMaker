@@ -16,7 +16,13 @@
                 {% for field in form %}
                 <div class="form-group">
                     {{ field.label_tag }}  <!-- Render the label element -->
-                    {% render_field field class="form-control" %}  <!-- Apply Bootstrap class -->
+                    {% if field.name == 'users' %}
+                        <div class="checkbox-group">
+                            {{ field }}
+                        </div>
+                    {% else %}
+                        {% render_field field class="form-control" %}  <!-- Apply Bootstrap class -->
+                    {% endif %}
                     {% if field.help_text %}
                     <small class="form-text text-muted">{{ field.help_text }}</small>
                     {% endif %}

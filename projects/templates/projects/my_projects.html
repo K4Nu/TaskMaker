@@ -51,6 +51,7 @@
             <!-- Project action buttons -->
             <div class="mt-2 d-flex justify-content-start">
                 <a href="{% url 'create_task' project_id=project.id %}" class="btn btn-primary me-2">Add Task</a>
+                <a href="{% url 'project_invitation' project_id=project.id %}" class="btn btn-info me-2">Invite User</a>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteProjectModal{{ project.id }}">
                     Delete Project
                 </button>

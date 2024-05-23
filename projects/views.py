@@ -10,30 +10,34 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .task import send_project_invitation
 from django.contrib.sites.shortcuts import get_current_site
-
+import math
 
 @login_required
 def create_task(request, project_id=None):
-    project=None
+    project = None
     if project_id:
-        project=get_object_or_404(Project,id=project_id)
+        project = get_object_or_404(Project, id=project_id)
         if not request.user in project.admins.all():
             messages.error(request, "You do not have permission to add tasks to this project.")
             return redirect("my_projects")
-    if request.method=="POST":
-        form=TaskForm(request.POST)
+
+    if request.method == "POST":
+        form = TaskForm(request.POST, project_id=project_id)
         if form.is_valid():
-            task=form.save(commit=False)
+            task = form.save(commit=False)
             if project:
-                task.project=project
+                task.project = project
             task.save()
-            task.assigned_users.add(request.user)
+            form.save_m2m()  # Save the many-to-many relationships
             messages.success(request, "Task created successfully.")
-            if project:return redirect("my_projects")
-            else:return redirect("index")
+            if project:
+                return redirect("my_projects")
+            else:
+                return redirect("index")
     else:
-        form=TaskForm()
-    return render(request,"projects/form.html",{"form":form,"project":project})
+        form = TaskForm(project_id=project_id)
+
+    return render(request, "projects/form.html", {"form": form, "project": project})
 
 @require_POST
 def delete_task(request,task_id):
@@ -76,7 +80,7 @@ def create_project(request):
             project = form.save()
             project.admins.add(request.user)
             project.users.add(request.user)
-            return redirect('index')
+            return redirect('my_projects')
     else:
         form = ProjectForm()  # no need to set initial here as model defaults should apply
 
@@ -132,6 +136,13 @@ def verify_project_invite(request,token):
 @login_required
 def project_dashboard(request,project_id):
     project=Project.objects.get(id=project_id)
+    today=timezone.now().date()
+    total_days=(project.date_end-project.date_start).days
+    days_passed=(project.date_end-today).days
+    if total_days>0:
+        days_percent=math.floor((days_passed/total_days)*100)
+    else:
+        days_percent=100
     if request.user in project.users.all():
-        return render(request,"projects/project.html")
+        return render(request,"projects/project.html",{"project":project,"today":today,"percent_passed":days_percent})
     return redirect("my_projects")
