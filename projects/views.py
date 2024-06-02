@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from .task import send_project_invitation
 from django.contrib.sites.shortcuts import get_current_site
 import math
+from users.views import notify_project_users
 
 @login_required
 def create_task(request, project_id=None):
@@ -22,20 +23,21 @@ def create_task(request, project_id=None):
             return redirect("my_projects")
 
     if request.method == "POST":
-        form = TaskForm(request.POST, project_id=project_id)
+        form = TaskForm(request.POST, project_id=project_id, user=request.user)
         if form.is_valid():
             task = form.save(commit=False)
             if project:
                 task.project = project
             task.save()
-            form.save_m2m()  # Save the many-to-many relationships
-            messages.success(request, "Task created successfully.")
-            if project:
-                return redirect("my_projects")
-            else:
+            if not project:
+                task.assigned_users.add(request.user)
                 return redirect("index")
+            else:
+                form.save_m2m()
+                return redirect("project_dashboard", project_id=project_id)
+
     else:
-        form = TaskForm(project_id=project_id)
+        form = TaskForm(project_id=project_id, user=request.user)
 
     return render(request, "projects/form.html", {"form": form, "project": project})
 
@@ -44,32 +46,42 @@ def delete_task(request,task_id):
     task=Task.objects.get(id=task_id)
     project=task.project
     task.delete()
-    if project:return redirect("my_projects")
+    if project:return redirect("project_dashboard",project_id=project.id)
     return redirect('index')
 
 @login_required
-def edit_task(request,task_id):
-    task=get_object_or_404(Task,pk=task_id)
-    if request.user in task.project.admins.all():
-        if request.method=="POST":
-            form=TaskForm(request.POST,instance=task)
-            if form.is_valid():
-                task=form.save()
-                return redirect('index')
-        else:
-            form=TaskForm(instance=task)
-    else:
-        messages.error("you can not download this")
-        return ("index")
-    return render(request,"projects/edit_task.html",{"form":form})
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+    project = task.project if task.project else None
+    if project and request.user not in project.admins.all():
+        messages.error(request, "You do not have permission to edit this task.")
+        return redirect('project_dashboard', project_id=project.id)
 
-#task_mark_as_done
+    if request.method == "POST":
+        form = TaskForm(request.POST, instance=task, project_id=project.id if project else None)
+        if form.is_valid():
+            task = form.save(commit=False)
+            if project:
+                task.project = project
+            task.save()
+            form.save_m2m()  # Save the many-to-many relationships
+            messages.success(request, "Task updated successfully.")
+            return redirect('project_dashboard', project_id=project.id)
+    else:
+        form = TaskForm(instance=task, project_id=project.id if project else None)
+
+    return render(request, "projects/edit_task.html", {"form": form, "task": task})
+
+
 @login_required
 def mark_as_done(request,task_id):
     task=Task.objects.get(id=task_id)
     task.status=False
     task.date_end=timezone.now().date()
     task.save()
+    if task.project:
+        notify_project_users(request,task)
+        return redirect("project_dashboard",project_id=task.project.id)
     return redirect('index')
 
 @login_required
@@ -106,7 +118,11 @@ def delete_project(request,project_id):
 @login_required
 def projects(request):
     projects=Project.objects.filter(users=request.user)
-    return render(request,"projects/my_projects.html",{"projects":projects})
+    projects_with_active_tasks={
+        project:project.tasks.filter(status=True)
+        for project in projects
+    }
+    return render(request, "projects/my_projects.html", {"projects_with_active_tasks": projects_with_active_tasks})
 
 @login_required
 def project_invitation(request,project_id):
@@ -117,10 +133,8 @@ def project_invitation(request,project_id):
             invitation=ProjectInvitation(email=email,project_id=project_id)
             invitation.save()
             domain=get_current_site(request).domain
-            send_project_invitation(email,domain,request.user,invitation.token)
-            return redirect("my_projects")
-        else:
-            print(form.errors)
+            send_project_invitation.delay(email,domain,request.user.username,invitation.token)
+            return redirect("project_dashboard",project_id=project_id)
     else:
         form=ProjectInvitationForm()
     return render(request,"projects/project_invite.html",{"form":form})
@@ -134,15 +148,65 @@ def verify_project_invite(request,token):
     return redirect("index")
 
 @login_required
-def project_dashboard(request,project_id):
-    project=Project.objects.get(id=project_id)
-    today=timezone.now().date()
-    total_days=(project.date_end-project.date_start).days
-    days_passed=(project.date_end-today).days
-    if total_days>0:
-        days_percent=math.floor((days_passed/total_days)*100)
+def project_dashboard(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    today = timezone.now().date()
+    total_days = (project.date_end - project.date_start).days
+    days_passed = (today - project.date_start).days
+
+    if total_days > 0 and project.date_end > today:
+        days_percent = math.floor((days_passed / total_days) * 100)
     else:
-        days_percent=100
+        days_percent = 100
+
+    overdue_tasks = []
+    upcoming_tasks = []
+
+    for task in project.tasks.filter(status=True):
+        if task.date_end < today:
+            overdue_days = (today - task.date_end).days
+            overdue_tasks.append((task, overdue_days))
+        else:
+            days_to_deadline = (task.date_end - today).days
+            upcoming_tasks.append((task, days_to_deadline))
+
     if request.user in project.users.all():
-        return render(request,"projects/project.html",{"project":project,"today":today,"percent_passed":days_percent})
+        return render(request, "projects/project.html", {
+            "project": project,
+            "today": today,
+            "percent_passed": days_percent,
+            "overdue_tasks": overdue_tasks,
+            "upcoming_tasks": upcoming_tasks
+        })
     return redirect("my_projects")
+
+
+@login_required
+def delete_project_user(request, user_id, project_id):
+    try:
+        project = Project.objects.get(id=project_id)
+        user = User.objects.get(id=user_id)
+    except (Project.DoesNotExist, User.DoesNotExist):
+        messages.error(request, "Project or User does not exist.")
+        return redirect("project_dashboard", project_id=project_id)
+
+    if request.user not in project.admins.all():
+        messages.error(request, "You do not have permission to remove this user.")
+        return redirect("project_dashboard", project_id=project_id)
+    if project.users.count()==1:
+        with transaction.atomic():
+            project.tasks.all().delete()
+            project.delete()
+        return redirect("my_projects")
+    tasks = project.tasks.filter(assigned_users=user)
+    for task in tasks:
+        if task.assigned_users.count() == 1:
+            for admin in project.admins.all():
+                if admin not in task.assigned_users.all():
+                    task.assigned_users.add(admin)
+        task.assigned_users.remove(user)
+
+    project.users.remove(user)
+    messages.success(request, "User has been successfully removed from the project.")
+    return redirect("project_dashboard", project_id=project_id)
+

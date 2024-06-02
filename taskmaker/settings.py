@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "admin_honeypot",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -68,8 +69,13 @@ TEMPLATES = [
 ]
 
 
-WSGI_APPLICATION = "taskmaker.wsgi.application"
-
+#WSGI_APPLICATION = "taskmaker.wsgi.application"
+ASGI_APPLICATION="taskmaker.asgi.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 AUTHENTICATION_BACKENDS = [
     'users.login_verification.EmailVerifiedBackend',
@@ -143,32 +149,10 @@ EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
-MAX_UPLOAD_SIZE=os.environ.get("MAX_UPLOAD_SIZE")
+MAX_UPLOAD_SIZE=int(eval(os.environ.get("MAX_UPLOAD_SIZE")))
 
 ACCOUNT_USERNAME_BLACKLIST=["admin", "profile", "employee"]
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        '': {  # This means all loggers
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-    },
-}
-
-from django.contrib.messages import constants as messages
-MESSAGE_TAGS = {
-    messages.ERROR: 'danger',
-}
 CELERY_BROKER_URL=os.environ.get("CELERY_BROKER_URL")
 CELERY_ACCEPT_CONTENT=["json"]
 CELERY_TASK_SERIALIZER="json"

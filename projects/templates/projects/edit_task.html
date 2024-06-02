@@ -1,0 +1,46 @@
+{% extends "users/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">  <!-- Center the form and limit its width -->
+            {% if task.project %}
+            <h2 class="text-center mb-4">Edit Task for "{{ task.project.title }}"</h2>
+            {% else %}
+            <h2 class="text-center mb-4">Edit Task</h2>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}  <!-- Render the label element -->
+                    {% if field.name == 'assigned_users' %}
+                        <div class="checkbox-group">
+                            {% for subfield in field %}
+                                <div class="form-check">
+                                    {{ subfield.tag }}  <!-- Render checkbox input -->
+                                    {{ subfield.choice_label }}  <!-- Render checkbox label -->
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {% render_field field class="form-control" %}  <!-- Apply Bootstrap class -->
+                    {% endif %}
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Edit Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

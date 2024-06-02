@@ -21,16 +21,30 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Task
 
+from django import forms
+from .models import Task, User
+
+from django import forms
+from .models import Task, User
+
+from django import forms
+from .models import Task, User
+
+from django import forms
+from .models import Task, Project
+
+
 class TaskForm(forms.ModelForm):
-    users = forms.ModelMultipleChoiceField(
+    assigned_users = forms.ModelMultipleChoiceField(
         queryset=User.objects.none(),
         label="Select Users",
         widget=forms.CheckboxSelectMultiple,
+        required=False  # Make this field optional
     )
 
     class Meta:
         model = Task
-        fields = ['title', 'content', 'users', 'date_start', 'date_end', 'color']
+        fields = ['title', 'content', 'assigned_users', 'date_start', 'date_end', 'color']
         widgets = {
             'date_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'date_end': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -40,12 +54,13 @@ class TaskForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         project_id = kwargs.pop("project_id", None)
+        user = kwargs.pop("user", None)
         super(TaskForm, self).__init__(*args, **kwargs)
-        if project_id:
-            self.fields["users"].queryset = User.objects.filter(project_users__id=project_id)
-        else:
-            self.fields.pop('users')
 
+        if project_id:
+            project = Project.objects.get(id=project_id)
+            self.fields['assigned_users'].queryset = project.users.all()
+            self.fields['assigned_users'].required = True  # Required when associated with a project
 
 
 class ProjectForm(forms.ModelForm):

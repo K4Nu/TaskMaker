@@ -10,7 +10,7 @@ from .forms import (
     ResendVerificationEmailForm,
     CustomLoginForm
 )
-from .models import Profile
+from .models import Profile,Notification
 from django.contrib.auth.decorators import login_required
 from django.core.signing import Signer, BadSignature
 from django.contrib.auth.models import User
@@ -23,7 +23,8 @@ from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
 from .task import send_verification_email,send_welcome
 from django.utils.timezone import now
-from django.core.exceptions import PermissionDenied
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 def index(request):
     if request.user.is_anonymous:
@@ -143,6 +144,22 @@ def custom_login_view(request):
         form = CustomLoginForm()
     return render(request, 'users/login.html', {'form': form})
 
+def notify_project_users(request,task):
+    project=task.project
+    users=project.users.all()
 
+    message=f'Task {task.title} is being completed by {request.user}'
 
-
+    for user in users:
+        if user!=request.user:
+            Notification.objects.create(
+                user=user,
+                text=message
+            )
+    channel_layer=get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"project_{project.id}_notifications",
+        {"type":"send_notification",
+         "notification":message
+         }
+    )

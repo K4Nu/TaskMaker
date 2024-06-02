@@ -5,24 +5,33 @@
 {% block content %}
 <style>
     .project-title {
-        font-size: 1.5rem; /* Increase the font size */
-        font-weight: bold; /* Make the title bold */
-        color: #2c3e50; /* Darker color for the title */
-        text-decoration: none; /* Remove underline from link */
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+        text-decoration: none;
     }
     .project-title:hover {
-        text-decoration: underline; /* Underline on hover */
+        text-decoration: underline;
     }
     .progress {
-        height: 30px; /* Make the progress bar thicker */
+        height: 30px;
     }
     .progress-bar {
-        font-size: 1.25rem; /* Increase the font size of the percentage text */
+        font-size: 1.25rem;
         display: flex;
         align-items: center;
         justify-content: center;
     }
+    .tasks-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .task-info {
+        margin-right: 10px;
+    }
 </style>
+
 <div class="container mt-3">
     <div class="text-center">
         <h1 class="mb-4">{{ project.title }}</h1>
@@ -35,23 +44,140 @@
     <div class="text-end">
         <small>End Date: {{ project.date_end|date:"l, F j, Y" }}</small>
     </div>
-    <h3>Tasks:</h3>
-    <ul class="list-group">
-        {% for task in project.tasks.all %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <h5>{{ task.title }}</h5>
-                <p>{{ task.content }}</p>
-                <small class="text-muted">Due by: {{ task.date_end|date:"l, F j, Y" }}</small>
+
+    <!-- Users List -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Project Participants:</h3>
+            <a href="{% url 'project_invitation' project_id=project.id %}" class="btn btn-primary">Invite Users</a>
+        </div>
+        <ul class="list-group">
+            {% for user in project.users.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <h6>{{ user.username }}</h6>
+                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#removeUserModal{{ user.id }}">Remove</button>
+            </li>
+
+            <!-- Remove User Modal -->
+            <div class="modal fade" id="removeUserModal{{ user.id }}" tabindex="-1" aria-labelledby="removeUserModalLabel{{ user.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="removeUserModalLabel{{ user.id }}">Confirm User Removal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to remove {{ user.username }} from this project?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{% url 'delete_project_user' user_id=user.id project_id=project.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <form action="{% url 'delete_task' task_id=task.id %}" method="post" class="mb-0">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-            </form>
-        </li>
-        {% empty %}
-        <li class="list-group-item">No tasks found.</li>
-        {% endfor %}
-    </ul>
+            {% empty %}
+            <li class="list-group-item">No participants found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="tasks-header mb-3">
+        <h3>Tasks:</h3>
+        <a href="{% url 'create_task' project_id=project.id %}" class="btn btn-primary">Create Task</a>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h4>Overdue Tasks</h4>
+            <ul class="list-group">
+                {% for task, overdue_days in overdue_tasks %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5>{{ task.title }}</h5>
+                        <p>{{ task.content }}</p>
+                        <small class="text-muted">Due by: {{ task.date_end|date:"l, F j, Y" }}</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-danger rounded-pill task-info">{{ overdue_days }} days late</span>
+                        <a href="{% url 'mark_as_done' task_id=task.id %}" class="btn btn-success btn-sm task-info">Mark as Done</a>
+                        <a href="{% url 'edit_task' task_id=task.id %}" class="btn btn-primary btn-sm task-info">Edit</a>
+                        <button type="button" class="btn btn-danger btn-sm task-info" data-bs-toggle="modal" data-bs-target="#deleteTaskModal{{ task.id }}">Delete</button>
+                    </div>
+                </li>
+
+                <!-- Delete Task Modal -->
+                <div class="modal fade" id="deleteTaskModal{{ task.id }}" tabindex="-1" aria-labelledby="deleteTaskModalLabel{{ task.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteTaskModalLabel{{ task.id }}">Confirm Task Deletion</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete this task?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{% url 'delete_task' task_id=task.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <li class="list-group-item">No overdue tasks found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6 mb-3">
+            <h4>Upcoming Tasks</h4>
+            <ul class="list-group">
+                {% for task, days_to_deadline in upcoming_tasks %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5>{{ task.title }}</h5>
+                        <p>{{ task.content }}</p>
+                        <small class="text-muted">Due by: {{ task.date_end|date:"l, F j, Y" }}</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-success rounded-pill task-info">{{ days_to_deadline }} days to deadline</span>
+                        <a href="{% url 'mark_as_done' task_id=task.id %}" class="btn btn-success btn-sm task-info">Mark as Done</a>
+                        <a href="{% url 'edit_task' task_id=task.id %}" class="btn btn-primary btn-sm task-info">Edit</a>
+                        <button type="button" class="btn btn-danger btn-sm task-info" data-bs-toggle="modal" data-bs-target="#deleteTaskModal{{ task.id }}">Delete</button>
+                    </div>
+                </li>
+
+                <!-- Delete Task Modal -->
+                <div class="modal fade" id="deleteTaskModal{{ task.id }}" tabindex="-1" aria-labelledby="deleteTaskModalLabel{{ task.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteTaskModalLabel{{ task.id }}">Confirm Task Deletion</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete this task?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{% url 'delete_task' task_id=task.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <li class="list-group-item">No upcoming tasks found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 </div>
 {% endblock %}

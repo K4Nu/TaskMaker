@@ -15,20 +15,24 @@
                 {% csrf_token %}
                 {% for field in form %}
                 <div class="form-group">
-                    {{ field.label_tag }}  <!-- Render the label element -->
-                    {% if field.name == 'users' %}
-                        <div class="checkbox-group">
-                            {{ field }}
-                        </div>
+                    {% if not project and field.name == 'assigned_users' %}
+                        <!-- Do not render the label and the field if no project -->
                     {% else %}
-                        {% render_field field class="form-control" %}  <!-- Apply Bootstrap class -->
+                        {{ field.label_tag }}  <!-- Render the label element -->
+                        {% if field.name == 'assigned_users' %}
+                            <div class="checkbox-group">
+                                {{ field }}
+                            </div>
+                        {% else %}
+                            {% render_field field class="form-control" %}  <!-- Apply Bootstrap class -->
+                        {% endif %}
+                        {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
                     {% endif %}
-                    {% if field.help_text %}
-                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% for error in field.errors %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                    {% endfor %}
                 </div>
                 {% endfor %}
                 <div class="text-center">

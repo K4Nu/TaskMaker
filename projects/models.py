@@ -21,6 +21,7 @@ class Task(BaseModel):
     color=models.CharField(max_length=7,default="#000000")
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks", null=True)
     assigned_users=models.ManyToManyField(User,related_name="task_users")
+    status=models.BooleanField(default=True)
 
 class ProjectInvitation(models.Model):
     email=models.EmailField()
