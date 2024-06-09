@@ -19,3 +19,8 @@ def send_project_invitation(email, domain, sender_username, token, ignore_result
     from_email = settings.DEFAULT_FROM_EMAIL
     recipient_list = [user.email]
     send_mail(subject, message, from_email, recipient_list)
+
+@shared_task
+def test_task():
+    print("Test task executed")
+    return "Task completed"
