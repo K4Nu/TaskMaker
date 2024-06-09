@@ -73,8 +73,11 @@ TEMPLATES = [
 ASGI_APPLICATION="taskmaker.asgi.application"
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': "channels.layers.InMemoryChannelLayer"
-    }
+        'BACKEND': "channels_redis.core.RedisChannelLayer",
+        'CONFIG': {
+            "hosts": [os.environ.get('REDIS_URL')],
+        },
+    },
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -87,7 +90,7 @@ AUTHENTICATION_BACKENDS = [
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get("ENGINE"),
+        'ENGINE': os.environ.get("DATABASE_ENGINE"),
         'NAME': os.environ.get("DATABASE_NAME"),
         'USER': os.environ.get("DATABASE_USER"),
         'PASSWORD': os.environ.get("DATABASE_PASSWORD"),

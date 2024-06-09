@@ -4,25 +4,30 @@
 <div class="container mt-5">
     <h2>{{ user.username }}'s Tasks</h2>
     <a href="{% url 'create_task' %}" class="btn btn-primary mb-3">Add New Task</a>
-    <div class="row">
+    <div class="grid-container">
         {% for task in tasks %}
-        <div class="col-md-4 mb-4">
+        <div class="grid-item">
             <div class="card">
-                <div class="card-header" style="background-color: {{ task.color }}; {% if task.color == '#000000' %}color: white;{% endif %}">
-                    {{ task.title }}
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: {{ task.color }}; {% if task.color == '#000000' %}color: white;{% endif %}">
+                    <span>{{ task.title }}</span>
+                    {% if task.project %}
+                    <small class="text-muted">{{ task.project.name }}</small>
+                    {% endif %}
                 </div>
-                <div class="card-body">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ task.title }}</h5>
-                    <p class="card-text">{{ task.description }}</p>
-                    <p class="card-text"><small class="text-muted">Start: {{ task.date_start }} - End: {{ task.date_end }}</small></p>
-                    <!-- Edit Button -->
-                    <a href="{% url 'edit_task' task.id %}" class="btn btn-warning">Edit</a>
-                    <!-- Toggle Done/Not Done Link -->
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#doneModal{{ task.id }}">
-                        Mark as Done
-                    </button>
-                    <!-- Delete Button -->
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ task.id }}">Delete</button>
+                    <p class="card-text">{{ task.content }}</p>
+                    <p class="card-text mt-auto"><small class="text-muted">Start: {{ task.date_start }} - End: {{ task.date_end }}</small></p>
+                    <div class="d-flex justify-content-between mt-3">
+                        <!-- Edit Button -->
+                        <a href="{% url 'edit_task' task.id %}" class="btn btn-warning">Edit</a>
+                        <!-- Toggle Done/Not Done Link -->
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#doneModal{{ task.id }}">
+                            {% if task.done %}Mark as Not Done{% else %}Mark as Done{% endif %}
+                        </button>
+                        <!-- Delete Button -->
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ task.id }}">Delete</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -41,9 +46,9 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <form action="{% url 'mark_as_done' task.id %}" method="post">
+                        <form action="{% url 'mark_as_done' task.id %}" method="post">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-success">Mark as Done</button>
+                            <button type="submit" class="btn btn-success">{% if task.done %}Mark as Not Done{% else %}Mark as Done{% endif %}</button>
                         </form>
                     </div>
                 </div>
@@ -76,45 +81,32 @@
         </div>
         {% endfor %}
     </div>
-    <!-- Pagination Controls -->
-    {% if tasks.has_other_pages %}
-    <div class="mt-4">
-        <nav>
-            <ul class="pagination justify-content-center">
-                {% if tasks.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1" aria-label="First">
-                        <span aria-hidden="true">&laquo;&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ tasks.previous_page_number }}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                {% endif %}
-                {% for num in tasks.paginator.page_range %}
-                {% if tasks.number == num %}
-                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
-                {% elif num > tasks.number|add:'-3' and num < tasks.number|add:'3' %}
-                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                {% endif %}
-                {% endfor %}
-                {% if tasks.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ tasks.next_page_number }}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ tasks.paginator.num_pages }}" aria-label="Last">
-                        <span aria-hidden="true">&raquo;&raquo;</span>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-    </div>
-    {% endif %}
 </div>
+{% endblock %}
+{% block extrahead %}
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-gap: 1rem;
+    }
+    .grid-item {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;  /* Set a maximum width for grid items */
+        margin-bottom: 1rem;  /* Add bottom margin for better spacing */
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var grid = document.querySelector('.grid-container');
+        var msnry = new Masonry(grid, {
+            itemSelector: '.grid-item',
+            columnWidth: '.grid-item',
+            percentPosition: true
+        });
+    });
+</script>
 {% endblock %}

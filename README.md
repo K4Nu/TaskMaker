@@ -1,7 +1,7 @@
 # Task Maker App
 
 ## Description
-![logo image](https://github.com/K4Nu/TaskMaker/blob/main/to_do/static/images/logo.png)
+![logo image](https://github.com/K4Nu/taskmaker/blob/k4nu/static/images/logo.png)
 Task Maker is a dynamic task management application designed to help individuals organize their projects and daily activities with deadlines efficiently.
 
 ## Features
@@ -25,5 +25,5 @@ Task Maker is a dynamic task management application designed to help individuals
 - ✅ **Create tasks and manage them** 
 - ✅ **Change ORM database to PostgreSQL**
 - ✅ **App deployment**
-- 🔲 **Notifications and email about task deadlines**
+
 

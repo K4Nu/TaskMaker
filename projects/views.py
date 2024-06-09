@@ -209,4 +209,3 @@ def delete_project_user(request, user_id, project_id):
     project.users.remove(user)
     messages.success(request, "User has been successfully removed from the project.")
     return redirect("project_dashboard", project_id=project_id)
-

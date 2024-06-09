@@ -30,14 +30,6 @@ def index(request):
     if request.user.is_anonymous:
         return render(request,"users/landing.html",{"today":now().date()})
     tasks = Task.objects.filter(status=True, date_end__gte=timezone.now(),assigned_users=request.user).order_by('date_end')
-    paginator=Paginator(tasks,9)
-    page=request.GET.get("page")
-    try:
-        tasks=paginator.page(page)
-    except PageNotAnInteger:
-        tasks=paginator.page(1)
-    except EmptyPage:
-        tasks.paginator.page(paginator.num_pages)
     return render(request,"users/index.html", {"tasks":tasks})
 
 def register(request):
